@@ -2,8 +2,6 @@ import { z } from "zod";
 
 import { getIdToken, signOut } from "@/lib/auth";
 
-/** Browser code must reach the API through the published port; server components
- *  resolve the Compose service name instead. */
 export function apiBaseUrl(): string {
   if (typeof window === "undefined") {
     return process.env.INTERNAL_API_URL ?? "http://backend:8000";
@@ -26,7 +24,6 @@ async function request<T>(
   schema: z.ZodType<T>,
   init?: RequestInit,
 ): Promise<T> {
-  // Every API route needs a signed-in user; don't send what would bounce.
   const token = await getIdToken();
   if (!token) throw new ApiError(401, "You are signed out");
 
@@ -45,8 +42,6 @@ async function request<T>(
     throw new ApiError(0, "Could not reach the API");
   }
 
-  // The API no longer accepts this session (revoked, or the pool changed):
-  // drop it, and the auth gate sends the user back to the login page.
   if (response.status === 401) signOut();
 
   if (!response.ok) {
@@ -65,8 +60,6 @@ async function request<T>(
   }
   return schema.parse(await response.json());
 }
-
-/* --- schemas mirroring the API contract in README section 5 --- */
 
 export const itemStatuses = ["todo", "in_progress", "done"] as const;
 export const itemStatusSchema = z.enum(itemStatuses);
@@ -102,8 +95,6 @@ export type ItemList = z.infer<typeof itemListSchema>;
 export type Health = z.infer<typeof healthSchema>;
 export type ItemInput = z.infer<typeof itemInputSchema>;
 
-/* --- endpoints --- */
-
 export const api = {
   readiness: () => request("/api/v1/health/ready", healthSchema),
 
@@ -130,3 +121,4 @@ export const api = {
   deleteItem: (id: string) =>
     request(`/api/v1/items/${id}`, z.undefined(), { method: "DELETE" }),
 };
+

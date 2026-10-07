@@ -1,83 +1,42 @@
 "use client";
 
-import { LogOut } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-
-import { Button } from "@/components/ui/button";
-import { signOut, useSession } from "@/lib/auth";
-import { cn } from "@/lib/utils";
-
-const links = [
-  { href: "/home", label: "Home" },
-  { href: "/items", label: "Board" },
-];
+import { useRouter } from "next/navigation";
 
 export function SiteHeader() {
-  const pathname = usePathname();
   const router = useRouter();
-  const session = useSession();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    router.push("/login");
+  };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/70 bg-background/80 backdrop-blur-md">
-      <div className="mx-auto flex h-14 w-full max-w-5xl items-center gap-8 px-6 sm:px-8">
-        <Link href="/home" className="flex items-center gap-2">
-          <span
-            aria-hidden
-            className="grid size-6 place-items-center rounded-md bg-foreground font-heading text-[13px] leading-none font-semibold text-background"
-          >
-            P
-          </span>
-          <span className="font-heading text-[15px] font-semibold tracking-tight">
-            Peach
-          </span>
+    <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 32px", borderBottom: "1px solid #eaeaea", background: "#fff" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+        <Link href="/home" style={{ fontSize: "20px", fontWeight: "bold", textDecoration: "none", color: "#000" }}>
+          🍑 Peach
         </Link>
-
-        <nav className="flex items-center gap-1 text-sm">
-          {links.map((link) => {
-            const active = pathname.startsWith(link.href);
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "rounded-md px-2.5 py-1.5 font-medium transition-colors",
-                  active
-                    ? "bg-accent text-foreground"
-                    : "text-muted-foreground hover:bg-accent hover:text-foreground",
-                )}
-              >
-                {link.label}
-              </Link>
-            );
-          })}
+        <nav style={{ display: "flex", gap: "16px" }}>
+          <Link href="/home" style={{ textDecoration: "none", color: "#333", fontWeight: 500 }}>
+            Головна
+          </Link>
+          <Link href="/items" style={{ textDecoration: "none", color: "#333", fontWeight: 500 }}>
+            Дошка (Board)
+          </Link>
         </nav>
+      </div>
 
-        {session && (
-          <div className="ml-auto flex items-center gap-2">
-            <span
-              aria-hidden
-              className="grid size-6 place-items-center rounded-full bg-tint-peach text-xs font-semibold text-tint-peach-foreground"
-            >
-              {session.name.charAt(0).toUpperCase()}
-            </span>
-            <span className="hidden text-sm text-muted-foreground sm:inline">
-              {session.email}
-            </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                signOut();
-                router.replace("/");
-              }}
-            >
-              <LogOut data-icon="inline-start" className="size-4" />
-              Log out
-            </Button>
-          </div>
-        )}
+      <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+        <Link href="/login" style={{ padding: "8px 16px", borderRadius: "6px", background: "#0070f3", color: "#fff", textDecoration: "none", fontSize: "14px", fontWeight: 600 }}>
+          Увійти
+        </Link>
+        <button 
+          onClick={handleLogout} 
+          style={{ padding: "8px 16px", borderRadius: "6px", border: "1px solid #ccc", background: "#fff", cursor: "pointer", fontSize: "14px" }}
+        >
+          Вийти
+        </button>
       </div>
     </header>
   );
